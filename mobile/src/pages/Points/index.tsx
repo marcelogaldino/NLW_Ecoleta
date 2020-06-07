@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Constants from 'expo-constants'
 import { Feather as Icon } from '@expo/vector-icons'
 import { View, StyleSheet, TouchableOpacity, Text, ScrollView, Image, Alert } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import MapView, { Marker } from 'react-native-maps'
 import { SvgUri } from 'react-native-svg'
 import * as Location from 'expo-location'
@@ -22,6 +22,11 @@ interface Point {
     longitude: number,
 }
 
+interface Params {
+    uf: string,
+    city: string
+}
+
 const Points = () => {
     const [items, setItems] = useState<Item[]>([])
     const [points, setPoints] = useState<Point[]>([])
@@ -30,6 +35,9 @@ const Points = () => {
     const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0])
     
     const navigation = useNavigation()
+    const route = useRoute()
+
+    const routeParams = route.params as Params
 
     useEffect(() => {
         async function loadPosition() {
@@ -43,8 +51,6 @@ const Points = () => {
 
             const { latitude, longitude } = location.coords
             
-            console.log(latitude, longitude)
-
             setInitialPosition([
                 latitude,
                 longitude
@@ -64,14 +70,14 @@ const Points = () => {
     useEffect(() => {
         api.get('points', {
             params: {
-                city: 'Mandaguari',
-                uf: 'PR',
-                items: [1, 2]
+                city: routeParams.city,
+                uf: routeParams.uf,
+                items: selectedItems
             }
         }).then(response => {
             setPoints(response.data)
         })
-    }, [])
+    }, [selectedItems])
 
     function handleNavigateBack() {
         navigation.goBack()
@@ -115,7 +121,7 @@ const Points = () => {
                             longitudeDelta: 0.014
                         }} 
                     >
-                        { points.map(point => {
+                        { points.map(point => (
                                 <Marker
                                 key={point.id}
                                 onPress={() => handleNavigateToDetail(point.id)}
@@ -130,7 +136,7 @@ const Points = () => {
                             <Text style={styles.mapMarkerTitle}>{ point.name }</Text>
                                 </View>
                             </Marker>
-                        })}
+                        ))}
                     </MapView>
                      ) } 
                 </View>

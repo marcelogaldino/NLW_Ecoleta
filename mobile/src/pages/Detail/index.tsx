@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, StyleSheet, Image, Text, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Image, Text, TouchableOpacity, Linking } from 'react-native'
 import { Feather as Icon, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import Constants from 'expo-constants'
@@ -35,7 +35,7 @@ const Detail = () => {
 
     useEffect(() => {
         api.get(`points/${routeParams.point_id}`).then(response => {
-
+          setData(response.data)
         })
     }, [])
 
@@ -48,6 +48,10 @@ const Detail = () => {
             subject: 'Interesse na Coleta de residuos',
             recipients: [data.point.email]
         })
+    }
+
+    function handleWhatsapp() {
+      Linking.openURL(`whatsapp://send?phone=${data.point.whatsapp}&text=Tenho interesse na coleta de residuos`)
     }
 
     if(!data.point) {
@@ -74,7 +78,7 @@ const Detail = () => {
             </View>
 
             <View style={styles.footer}>
-                <RectButton style={styles.button} onPress={() => {}} >
+                <RectButton style={styles.button} onPress={handleWhatsapp} >
                     <FontAwesome name="whatsapp" size={20} color="#FFF" />
                     <Text style={styles.buttonText}>Whatsapp</Text>
                 </RectButton>
